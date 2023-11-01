@@ -7,7 +7,6 @@ window.onload = function() {
   var form = document.getElementById('converter');
   form.onsubmit = submitted.bind(form);
 }
-
 function submitted(event) {
   
   event.preventDefault();
@@ -53,20 +52,26 @@ function submitted(event) {
   data.push(document.getElementById("communicationField").value);
 
 
-
-  var asdf = new QRCode(document.getElementById("qrcode"), data.toString());
+  var temp= document.createElement('a');
+  var asdf = new QRCode(temp, data.toString());
+  document.getElementById("qrcode").appendChild(temp);
   modal.style.display = "block";//display popup
   // When the user clicks on <span> (x), close the modal
 span.onclick = function() {
-  modal.style.display = "none";
-  window.location.reload();
+  nextMatch();
 }
 
 // When the user clicks anywhere outside of the modal, close it
 window.onclick = function(event) {
   if (event.target == modal) {
-    modal.style.display = "none";
-    window.location.reload();
+    nextMatch();
   }
+}
+
+
+function nextMatch() {
+  modal.style.display = "none";
+  asdf.clear();
+  document.getElementById("qrcode").removeChild(document.getElementById("qrcode").firstElementChild);
 }
 }
