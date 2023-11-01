@@ -12,7 +12,10 @@ function submitted(event) {
   
   event.preventDefault();
   var data = [];
-
+  //match num
+  data.push(document.getElementById("matchNumber").value);
+  //team num
+  data.push(document.getElementById("teamNumber").value);
   //auto
   data.push(document.querySelector("input[type='radio'][name=autoConesTop]:checked").value);
   data.push(document.querySelector("input[type='radio'][name=autoConesMiddle]:checked").value);
