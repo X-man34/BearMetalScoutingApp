@@ -10,9 +10,11 @@
     <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
     <button id="signout_button" onclick="handleSignoutClick()">Sign Out</button>
-
+    <button id="scanCodeButton" onclick="handleScanClick()">Scan and import match</button>
     <pre id="content" style="white-space: pre-wrap;"></pre>
 
+    <video id="preview" autoplay></video>
+    
     <script type="text/javascript">
       /* exported gapiLoaded */
       /* exported gisLoaded */
@@ -36,6 +38,7 @@
 
       document.getElementById('authorize_button').style.visibility = 'hidden';
       document.getElementById('signout_button').style.visibility = 'hidden';
+      document.getElementById('scanCodeButton').style.visibility = 'hidden';
 
       /**
        * Callback after api.js is loaded.
@@ -88,8 +91,8 @@
             throw (resp);
           }
           document.getElementById('signout_button').style.visibility = 'visible';
+          document.getElementById('scanCodeButton').style.visibility = 'visible';
           document.getElementById('authorize_button').innerText = 'Refresh';
-          await listMajors();
         };
 
         if (gapi.client.getToken() === null) {
@@ -113,14 +116,11 @@
           document.getElementById('content').innerText = '';
           document.getElementById('authorize_button').innerText = 'Authorize';
           document.getElementById('signout_button').style.visibility = 'hidden';
+          document.getElementById('scanCodeButton').style.visibility = 'hidden';
         }
       }
 
-      /**
-       * Print the names and majors of students in a sample spreadsheet:
-       * https://docs.google.com/spreadsheets/d/1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms/edit
-       */
-      async function listMajors() {
+      async function scanQRCodes() {
         let response;
         try {
           // Fetch first 10 files
@@ -143,8 +143,32 @@
             'Name, Major:\n');
         document.getElementById('content').innerText = output;
       }
+      //this gets called whenever an athenticated user clicks the scan match in button. 
+      function handleScanClick() {
+        alert('Scanning');
+        const video = document.getElementById('preview');
+        let scanner = new Instascan.Scanner({ video: video});
+        scanner.addListener('scan', function (content) {
+          alert(content);
+        });
+        Instascan.Camera.getCameras().then(function (cameras) {
+          if (cameras.length > 0) {
+            scanner.start(cameras[0]);
+                scanner.addListener('scan', function(content) {
+                    alert('QR code scanned! Content: ' + content);
+                    // You can perform additional actions with the scanned content here
+                });
+          } else {
+            console.error('No cameras found on this device.');
+          }
+        }).catch(function(e) {
+            alert('Error accessing camera: ' + e);
+        });
+      }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
     <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
   </body>
 </html>
