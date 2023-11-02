@@ -51,6 +51,9 @@ function submitted(event) {
   //comms
   data.push(document.getElementById("communicationField").value);
 
+  //notes
+  data.push(document.getElementById('notes').value);
+
 
   var temp= document.createElement('a');
   var asdf = new QRCode(temp, data.toString());

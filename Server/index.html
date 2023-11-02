@@ -120,43 +120,19 @@
         }
       }
 
-      async function scanQRCodes() {
-        let response;
-        try {
-          // Fetch first 10 files
-          response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgvE2upms',
-            range: 'Class Data!A2:E',
-          });
-        } catch (err) {
-          document.getElementById('content').innerText = err.message;
-          return;
-        }
-        const range = response.result;
-        if (!range || !range.values || range.values.length == 0) {
-          document.getElementById('content').innerText = 'No values found.';
-          return;
-        }
-        // Flatten to string to display
-        const output = range.values.reduce(
-            (str, row) => `${str}${row[0]}, ${row[4]}\n`,
-            'Name, Major:\n');
-        document.getElementById('content').innerText = output;
-      }
       //this gets called whenever an athenticated user clicks the scan match in button. 
       function handleScanClick() {
-        alert('Scanning');
         const video = document.getElementById('preview');
         let scanner = new Instascan.Scanner({ video: video});
         scanner.addListener('scan', function (content) {
-          alert(content);
+          //idk what this is for
         });
         Instascan.Camera.getCameras().then(function (cameras) {
           if (cameras.length > 0) {
             scanner.start(cameras[0]);
                 scanner.addListener('scan', function(content) {
-                    alert('QR code scanned! Content: ' + content);
-                    // You can perform additional actions with the scanned content here
+                    //parse the data into the spreadsheet
+                    parseData(content);
                 });
           } else {
             console.error('No cameras found on this device.');
@@ -164,6 +140,28 @@
         }).catch(function(e) {
             alert('Error accessing camera: ' + e);
         });
+      }
+
+
+      async function parseData(content) {
+        let response;
+        let tbaTemp;
+        //need to recreate fetchData stuff here and then have it do the stuff. 
+        //good night
+        try {
+          response = await gapi.client.sheets.spreadsheets.values.get({
+            spreadsheetId: '1ISNGUcObQgvC8pOLPRw2DZvNUy5lkMCjqjgicyDDmF8',
+            range: 'Controls!B3',
+          });
+        } catch (err) {
+          document.getElementById('content').innerText = err.message;
+          return;
+        }
+        const targetSheet = response.result[0][0];
+        const matchNum = content[0];
+        const teamNum = content[1];
+        
+        
       }
     </script>
     <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
