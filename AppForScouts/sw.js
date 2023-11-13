@@ -6,14 +6,13 @@ self.addEventListener('install', event => {
     const cache = await caches.open(CACHE_NAME);
     cache.addAll([
       '/',
-      '/converter.js',
-      '/converter.css'
+      '/AppForScouts/converter.css'
     ]);
   })());
 });
 
 self.addEventListener('fetch', event => {
-  SwUpdate.checkForUpdate();
+  //SwUpdate.checkForUpdate();
   event.respondWith((async () => {
     const cache = await caches.open(CACHE_NAME);
 
