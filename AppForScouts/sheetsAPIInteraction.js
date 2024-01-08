@@ -9,13 +9,32 @@
 
       // Authorization scopes required by the API; multiple scopes can be
       // included, separated by spaces.
-      const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly';
+      const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
       const spreadsheetId = "1ISNGUcObQgvC8pOLPRw2DZvNUy5lkMCjqjgicyDDmF8";
       let tokenClient;
       let gapiInited = false;
       let gisInited = false;
 
       let signedIn = false;
+
+
+      let speakerAuto = 0;
+      let ampAuto = 0;
+      let speakerTele = 0;
+      let ampTele = 0;
+      let amplifications = 0;
+      let trap = 0;
+      let climb = "none";
+      let cooperated = false;
+      let lostComms = false;
+      let defended = false;
+      let spotlighted = false;
+      let notes = "if your reading thing, there was an error."//this should get overritten by the form lol
+       
+
+
+
+
 
       /**
        * Callback after api.js is loaded.
@@ -33,8 +52,7 @@
           apiKey: API_KEY,
           discoveryDocs: [DISCOVERY_DOC],
         });
-        gapiInited = true;
-        maybeEnableButtons();
+        gapiInited = true; 
       }
 
       /**
@@ -47,17 +65,8 @@
           callback: '', // defined later
         });
         gisInited = true;
-        maybeEnableButtons();
       }
 
-      /**
-       * Enables user interaction after all libraries are loaded.
-       */
-      function maybeEnableButtons() {
-        if (gapiInited && gisInited) {
-          document.getElementById('authorize_button').style.visibility = 'visible';
-        }
-      }
 
       /**
        *  Sign in the user upon button click.
@@ -68,6 +77,8 @@
             throw (resp);
           }
           signedIn = true;
+          sendDataToSheets(arguments[0]);
+          return true;
         };
 
         if (gapi.client.getToken() === null) {
@@ -78,6 +89,7 @@
           // Skip display of account chooser and consent dialog for an existing session.
           tokenClient.requestAccessToken({prompt: ''});
         }
+        return signedIn;
       }
 
       /**
@@ -94,10 +106,17 @@
 
 
 
-      async function parseData(content) {
+      function parseData(content) {
         if (!signedIn) {
-          handleAuthClick();
+          handleAuthClick(content);
+        }else {
+          sendDataToSheets(content);
         }
+        
+      }
+
+
+      async function sendDataToSheets(content) {
         let response;
         try {
           // Fetch first 10 files
@@ -111,23 +130,22 @@
         const eventKey = response.result.values[0];
         const targetSheetName = response.result.values[1];
         const tbaAPIKey = response.result.values[2];
-        
-        let values = [content.slice(2,content.length)];
+        let values = [content.slice(3, content.length)];
+        let row = 2 + ((parseInt(content[1]) - 1) * 6 + parseInt(content[0]));
         const body = {
-          values: [['test']],
-        }
-
+          values: values,
+        };
 
         try {
           gapi.client.sheets.spreadsheets.values.update({
             spreadsheetId: spreadsheetId,
-            range: 'GirlsGen!N2',
+            range: 'GirlsGen!N' + row + ':AL' + row,
             valueInputOption: 'RAW',
             resource: body,
           }).then((response) => {
             const result = response.result;
             console.log(`${result.updatedCells} cells updated.`);
-            if (callback) callback(response);
+            //if (callback) callback(response);
           });
         } catch (err) {
           alert("error posting data");
